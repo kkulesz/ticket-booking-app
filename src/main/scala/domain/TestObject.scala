@@ -1,12 +1,9 @@
 package domain
 
 import java.time.LocalDateTime
-import zio.json.JsonDecoder
-import zio.json.DeriveJsonDecoder
-import zio.json.JsonEncoder
-import zio.json.DeriveJsonEncoder
+import zio.json._
 
-final case class TestObject(int: Int, string: String, dateTime: LocalDateTime)
+final case class TestObject(int: Int, string: String, dateTime: LocalDateTime, enum: MyTestEnum)
 
 object TestObject {
   implicit val decoder: JsonDecoder[TestObject] = DeriveJsonDecoder.gen[TestObject]
