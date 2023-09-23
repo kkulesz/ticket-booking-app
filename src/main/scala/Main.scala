@@ -1,7 +1,7 @@
 import zio.ZIOAppDefault
 import zio.http.Server
 
-import api.{TestRoutes, MultiplexRoutes, MultiplexHandlerBasic}
+import api.{MultiplexRoutes, MultiplexHandlerBasic}
 import repository.MultiplexRepositoryInMemory
 
 // object Main extends App {
@@ -12,7 +12,7 @@ object ZioApp extends ZIOAppDefault {
   val layers = MultiplexRepositoryInMemory.layer ++ MultiplexHandlerBasic.layer
 
   override val run = {
-    val routes = TestRoutes() ++ MultiplexRoutes()
+    val routes = MultiplexRoutes()
     println("-------------Running server-------------")
     Server
       .serve(routes)
