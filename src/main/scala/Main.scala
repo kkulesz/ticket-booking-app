@@ -1,6 +1,7 @@
 import zio.ZIOAppDefault
 import zio.http.Server
-import api.TestRoutes
+import api.{TestRoutes, MultiplexRoutes}
+import repository.MultiplexRepositoryInMemory
 
 // object Main extends App {
 //   println("Hello, World!")
@@ -8,8 +9,13 @@ import api.TestRoutes
 
 object ZioApp extends ZIOAppDefault {
   override val run = {
-    var routes = TestRoutes()
+    val routes = TestRoutes() ++ MultiplexRoutes()
     println("-------------Running server-------------")
-    Server.serve(routes).provide(Server.defaultWithPort(8081))
+    Server
+      .serve(routes)
+      .provide(
+        Server.defaultWithPort(8081), 
+        MultiplexRepositoryInMemory.layer
+        )
   }
 }
