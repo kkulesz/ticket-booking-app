@@ -3,7 +3,7 @@ package api
 import zio._
 import zio.http._
 import zio.json._
-import domain.TestObject
+import models.TestObject
 import java.time.LocalDateTime
 
 object TestRoutes {

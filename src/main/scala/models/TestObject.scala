@@ -1,4 +1,4 @@
-package domain
+package models
 
 import java.time.LocalDateTime
 import zio.json._
