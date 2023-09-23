@@ -2,7 +2,7 @@ package api.requestModel
 
 import zio.json._
 
-import models.domainModel.TicketType
+import domain.TicketType
 
 final case class SeatReservation(seat: (Int, Int), ticketType: TicketType)
 

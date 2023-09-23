@@ -9,7 +9,7 @@ import java.util.UUID
 import api.responseModel._
 import repository.MultiplexRepository
 import api.requestModel.ReservationRequest
-import models.domainModel.Reservation
+import domain.Reservation
 
 trait MultiplexHandler {
   def getScreeningsFromTime(

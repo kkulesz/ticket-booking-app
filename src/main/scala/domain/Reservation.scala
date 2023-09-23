@@ -1,4 +1,4 @@
-package models.domainModel
+package domain
 
 import java.util.UUID
 
@@ -9,4 +9,5 @@ final case class Reservation(
     name: String,
     surname: String,
     ticketType: TicketType
+    
 )

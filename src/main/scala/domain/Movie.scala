@@ -1,4 +1,4 @@
-package models.domainModel
+package domain
 
 import zio.json._
 import java.util.UUID

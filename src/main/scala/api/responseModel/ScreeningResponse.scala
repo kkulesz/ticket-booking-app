@@ -4,8 +4,7 @@ import zio.json._
 import java.time.LocalDateTime
 import java.util.UUID
 
-import models.domainModel.Screening
-import models.domainModel.Movie
+import domain.{Screening, Movie}
 
 final case class ScreeningResponse(
     id: UUID,

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import zio.ZIO
 import zio.Task
 
-import models.domainModel._
+import domain._
 
 trait MultiplexRepository {
   def getScreeningsFromTime(timestamp: LocalDateTime): Task[List[Screening]]

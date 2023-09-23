@@ -1,6 +1,6 @@
 package repository
 
-import models.domainModel._
+import domain._
 import java.time.LocalDateTime
 import zio.ZLayer
 import zio.ZIO

@@ -1,8 +1,7 @@
 package api.responseModel
 
 import zio.json._
-import models.domainModel.Room
-import models.domainModel.Reservation
+import domain.{Room, Reservation}
 
 final case class DetailedScreeningResponse(
     roomId: String,
