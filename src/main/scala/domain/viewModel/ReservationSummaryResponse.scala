@@ -1,4 +1,4 @@
-package api.responseModel
+package domain.viewModel
 
 import zio.json._
 import java.time.LocalDateTime

@@ -6,11 +6,10 @@ import zio.Task
 import zio.ZLayer
 import java.util.UUID
 
-import api.responseModel._
 import repository.MultiplexRepository
 import api.requestModel.ReservationRequest
-import domain.Reservation
-import domain.Room
+import domain._
+import domain.viewModel._
 
 trait MultiplexHandler {
   def getScreeningsFromTime(
