@@ -24,7 +24,7 @@ object MultiplexRoutes {
           screenings <- MultiplexHandler.getScreeningsFromTime(properTime)
         } yield Response.json(screenings.toJson)
 
-        response.catchAll(_ => ZIO.succeed(Response.status(Status.BadRequest)))
+        catchErrorToProperResponse(response)
 
       case req @ Method.GET -> Root / "screenings" =>
         val response = for {
@@ -33,7 +33,7 @@ object MultiplexRoutes {
           detailedScreening <- MultiplexHandler.getDetailedScreening(properId)
         } yield Response.json(detailedScreening.toJson)
 
-        response.catchAll(_ => ZIO.succeed(Response.status(Status.BadRequest)))
+        catchErrorToProperResponse(response)
 
       case req @ Method.POST -> Root / "screenings" =>
         val response = for {
@@ -44,6 +44,22 @@ object MultiplexRoutes {
           )
         } yield Response.json(reservationSummary.toJson)
 
-        response.catchAll(_ => ZIO.succeed(Response.status(Status.BadRequest)))
+        catchErrorToProperResponse(response)
+    }
+
+  private def catchErrorToProperResponse(
+      response: ZIO[
+        MultiplexHandler with MultiplexRepository,
+        Serializable,
+        Response
+      ]
+  ): ZIO[MultiplexHandler with MultiplexRepository, Nothing, Response] =
+    response.catchAll { case e: RuntimeException =>
+      ZIO.succeed(
+        Response(
+          Status.BadRequest,
+          body = Body.fromString(s"""{"error": "${e.getMessage}"}""")
+        )
+      )
     }
 }

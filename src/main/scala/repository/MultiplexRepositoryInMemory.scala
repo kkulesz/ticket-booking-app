@@ -41,15 +41,29 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
       rooms.find(_.id == id)
     )
 
-   override def insertReservations(newReservations: List[Reservation]): Task[Unit] = 
+  override def insertReservations(
+      newReservations: List[Reservation]
+  ): Task[Unit] =
     ZIO.succeed(
-      this.reservations = this.reservations ++ newReservations //TODO comment
+      this.reservations = this.reservations ++ newReservations // TODO comment
     )
 
   private val movies: List[Movie] = List(
-    Movie(UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72a"), "Szybcy i wściekli", 90),
-    Movie(UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72b"), "Piraci z karaibów", 120),
-    Movie(UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72c"), "Incepcja", 150)
+    Movie(
+      UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72a"),
+      "Szybcy i wściekli",
+      90
+    ),
+    Movie(
+      UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72b"),
+      "Piraci z karaibów",
+      120
+    ),
+    Movie(
+      UUID.fromString("67f4b3d9-2451-422c-8366-ff5ca12ec72c"),
+      "Incepcja",
+      150
+    )
   )
   private val rooms: List[Room] = List(
     Room("pokój nr 1", 10, 10),
@@ -57,6 +71,7 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
     Room("pokój nr 3", 5, 10)
   )
   private val screenings: List[Screening] = List(
+    // 1st room screenings
     Screening(
       UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72a"),
       movies(0).id,
@@ -66,8 +81,34 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
     Screening(
       UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72b"),
       movies(1).id,
+      rooms(0).id,
+      LocalDateTime.parse("2023-09-22T12:30:00")
+    ),
+    // 2nd room screenings
+    Screening(
+      UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72c"),
+      movies(0).id,
       rooms(1).id,
       LocalDateTime.parse("2023-09-22T12:30:00")
+    ),
+    Screening(
+      UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72d"),
+      movies(1).id,
+      rooms(1).id,
+      LocalDateTime.parse("2023-09-22T12:35:00")
+    ),
+    // 3rd room screenings
+    Screening(
+      UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72e"),
+      movies(1).id,
+      rooms(2).id,
+      LocalDateTime.parse("2023-09-22T12:30:00")
+    ),
+    Screening(
+      UUID.fromString("99f4b3d9-2451-422c-8366-ff5ca12ec72f"),
+      movies(2).id,
+      rooms(2).id,
+      LocalDateTime.parse("2023-09-22T12:35:00")
     )
   )
 
