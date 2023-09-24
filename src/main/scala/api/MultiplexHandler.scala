@@ -94,7 +94,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
       room <- ZIO
         .fromOption(roomOpt)
-        .mapError(_ => new RuntimeException("Internal server error: No such room")) //TODO: comment
+        .mapError(_ => new RuntimeException("Internal server error: No such room")) // TODO: comment
 
     } yield DetailedScreeningResponse.fromDomain(room, reservations)
 
@@ -113,7 +113,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
     room <- ZIO
       .fromOption(roomOpt)
-      .mapError(_ => new RuntimeException("Internal server error: No such room")) //TODO: comment
+      .mapError(_ =>new RuntimeException("Internal server error: No such room")) // TODO: comment
 
     _ <- validateReservations(request, reservationsSoFar, room)
     newReservations = request.seats.map(sr =>
@@ -164,17 +164,45 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       ZIO.fail(new RuntimeException("Reservation must apply to at least one seat!"))
     else if (reservedSeats.intersect(seatsToBeReserved).length > 0)
       ZIO.fail(new RuntimeException("Seats already occupied!"))
-    else if (checkIfSingleSeatIsNotLeft(seatsToBeReserved, reservedSeats, room))
+    else if (seatsToBeReserved.find { case (r, c) => (r < 0 || r > room.rows) || (c < 0 || c >= room.columns)}.isDefined)
+      ZIO.fail(new RuntimeException("Seat number out of range!"))
+    else if (room.columns > 2 && checkIfSingleSeatIsNotLeftBetween(seatsToBeReserved, reservedSeats, room))
       ZIO.fail(new RuntimeException("There cannot be a single place left over in a row between two already reserved places!"))
     else
       ZIO.unit
   }
 
-  private def checkIfSingleSeatIsNotLeft(
+  private def checkIfSingleSeatIsNotLeftBetween(
       seatsToBeReserved: List[(Int, Int)],
       reservedSeats: List[(Int, Int)],
       room: Room
-  ): Boolean = ??? //TODO
+  ): Boolean = {
+    val allReservedSeats = seatsToBeReserved ++ reservedSeats
+    val groupedByRow = allReservedSeats
+      .groupBy(_._1)
+      .map { case (r, l) =>
+        (r , l.map (_._2))
+      }
+      .toList
+
+    /*
+    the idea is:
+      for each row that has at least two seats to be reserved
+      create a string of '0' and '1' where zero means empty seat and one - occupied.
+      After such strings are created then look for "101" substring.
+    */
+    val stringRepresentations = groupedByRow
+      .filter(_._2.length > 1) // if there is less than 2 seats occupied, then it is impossible to have such situation
+      .map { case (_, columns) => 
+        val indexes = (0 to room.columns).toList
+        indexes.foldLeft("") { case (bits, index) =>
+          if (columns.contains(index)) bits + "1"
+          else bits + "0"
+        }
+      }
+
+    stringRepresentations.find(_.contains("101")).isDefined
+  }
 
 }
 

@@ -66,9 +66,9 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
     )
   )
   private val rooms: List[Room] = List(
-    Room("pokój nr 1", 10, 10),
-    Room("pokój nr 2", 10, 20),
-    Room("pokój nr 3", 5, 10)
+    Room("pokój nr 1", 2, 2),
+    Room("pokój nr 2", 3, 1),
+    Room("pokój nr 3", 4, 3)
   )
   private val screenings: List[Screening] = List(
     // 1st room screenings
