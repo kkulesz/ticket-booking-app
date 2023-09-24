@@ -3,6 +3,7 @@ out
 .bloop
 .metals
 .bsp
+postgres-data
 
 *.class
 *.log
