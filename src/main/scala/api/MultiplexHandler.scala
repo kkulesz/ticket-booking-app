@@ -10,6 +10,7 @@ import api.responseModel._
 import repository.MultiplexRepository
 import api.requestModel.ReservationRequest
 import domain.Reservation
+import domain.Room
 
 trait MultiplexHandler {
   def getScreeningsFromTime(
@@ -66,9 +67,9 @@ class MultiplexHandlerBasic extends MultiplexHandler {
           movies
             .filter(_.id == s.movieId)
             .map(m => (s, m))
-        ) 
+        )
         // sorting in alphabetical order, then from earliest
-        .sortWith { case ((s1, m1), (s2, m2)) => 
+        .sortWith { case ((s1, m1), (s2, m2)) =>
           if (m1.title == m2.title)
             s1.time.isBefore(s2.time)
           else
@@ -91,12 +92,9 @@ class MultiplexHandlerBasic extends MultiplexHandler {
 
       reservations <- MultiplexRepository.getScreeningReservations(screening.id)
       roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
-
-      // it should be some kind of internal server error, since its problem in data state.
-      // Normally we shouldn't communicate it to the user
       room <- ZIO
         .fromOption(roomOpt)
-        .mapError(_ => new RuntimeException("Internal server error: No such room"))
+        .mapError(_ => new RuntimeException("Internal server error: No such room")) //TODO: comment
 
     } yield DetailedScreeningResponse.fromDomain(room, reservations)
 
@@ -112,7 +110,12 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     reservationsSoFar <- MultiplexRepository
       .getScreeningReservations(screening.id)
 
-    _ <- validateReservations(request, reservationsSoFar)
+    roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
+    room <- ZIO
+      .fromOption(roomOpt)
+      .mapError(_ => new RuntimeException("Internal server error: No such room")) //TODO: comment
+
+    _ <- validateReservations(request, reservationsSoFar, room)
     newReservations = request.seats.map(sr =>
       Reservation(
         request.screeningId,
@@ -141,21 +144,37 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       ZIO.fail(new RuntimeException("Name and surname must have at least 3 characters!"))
     else if (!fn(0).isUpper || !sn(0).isUpper)
       ZIO.fail(new RuntimeException("Name and surname must start with capital letter!"))
-    else if (sn.count(_ == '-') == 1 && (sn.takeRight(1) == "-"  || !sn.split('-')(1)(0).isUpper)) // ugly, I know
+    else if (sn.count(_ == '-') == 1 && (sn.takeRight(1) == "-" || !sn.split('-')(1)(0).isUpper)) // ugly, I know
       ZIO.fail(new RuntimeException("All parts of surname must start with capital letter!"))
-    else if (sn.count(_ == '-') > 1 )
+    else if (sn.count(_ == '-') > 1)
       ZIO.fail(new RuntimeException("Surname may have two parts at most!"))
-    else 
+    else
       ZIO.unit
   }
 
   private def validateReservations(
       request: ReservationRequest,
-      reservationsSoFar: List[Reservation]
+      reservationsSoFar: List[Reservation],
+      room: Room
   ): ZIO[MultiplexRepository, Throwable, Unit] = {
-    // TODO
-    ZIO.unit
+    val seatsToBeReserved = request.seats.map(_.seat)
+    val reservedSeats = reservationsSoFar.map(r => (r.row, r.column))
+
+    if (request.seats.length == 0)
+      ZIO.fail(new RuntimeException("Reservation must apply to at least one seat!"))
+    else if (reservedSeats.intersect(seatsToBeReserved).length > 0)
+      ZIO.fail(new RuntimeException("Seats already occupied!"))
+    else if (checkIfSingleSeatIsNotLeft(seatsToBeReserved, reservedSeats, room))
+      ZIO.fail(new RuntimeException("There cannot be a single place left over in a row between two already reserved places!"))
+    else
+      ZIO.unit
   }
+
+  private def checkIfSingleSeatIsNotLeft(
+      seatsToBeReserved: List[(Int, Int)],
+      reservedSeats: List[(Int, Int)],
+      room: Room
+  ): Boolean = ??? //TODO
 
 }
 
