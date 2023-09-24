@@ -55,30 +55,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
   override def getScreeningsFromTime(
       timestamp: LocalDateTime
   ): ZIO[MultiplexRepository, Throwable, List[ScreeningResponse]] =
-    for {
-      // I am aware of the terrible performance in normal scale
-      screenings <- MultiplexRepository.getScreeningsFromTime(timestamp)
-      movieIds = screenings.map(_.movieId)
-      movies <- MultiplexRepository.getMoviesByIds(movieIds)
-
-      screeningsWithMovies = screenings
-        .flatMap(s =>
-          movies
-            .filter(_.id == s.movieId)
-            .map(m => (s, m))
-        )
-        // sorting in alphabetical order, then from earliest
-        .sortWith { case ((s1, m1), (s2, m2)) =>
-          if (m1.title == m2.title)
-            s1.time.isBefore(s2.time)
-          else
-            m1.title < m2.title
-        }
-
-      response = screeningsWithMovies.map { case (s, m) =>
-        ScreeningResponse.fromDomain(s, m)
-      }
-    } yield response
+    MultiplexRepository.getScreeningsFromTime(timestamp)
 
   def getDetailedScreening(
       id: UUID

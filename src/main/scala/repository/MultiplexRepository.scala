@@ -6,25 +6,22 @@ import zio.ZIO
 import zio.Task
 
 import domain._
+import domain.viewModel._
 
 trait MultiplexRepository {
-  def getScreeningsFromTime(timestamp: LocalDateTime): Task[List[Screening]]
+  def getScreeningsFromTime(timestamp: LocalDateTime): Task[List[ScreeningResponse]]
   def getScreeningById(id: UUID): Task[Option[Screening]]
-  def getMoviesByIds(ids: List[UUID]): Task[List[Movie]]
   def getScreeningReservations(screeningId: UUID): Task[List[Reservation]]
   def getRoomById(id: String): Task[Option[Room]]
   def insertReservations(newReservations: List[Reservation]): Task[Unit]
 }
 
 object MultiplexRepository {
-  def getScreeningsFromTime(timestamp: LocalDateTime): ZIO[MultiplexRepository, Throwable, List[Screening]] =
+  def getScreeningsFromTime(timestamp: LocalDateTime): ZIO[MultiplexRepository, Throwable, List[ScreeningResponse]] =
     ZIO.serviceWithZIO[MultiplexRepository](_.getScreeningsFromTime(timestamp))
 
   def getScreeningById(id: UUID): ZIO[MultiplexRepository, Throwable, Option[Screening]] =
     ZIO.serviceWithZIO[MultiplexRepository](_.getScreeningById(id))
-
-  def getMoviesByIds(ids: List[UUID]): ZIO[MultiplexRepository, Throwable, List[Movie]] =
-    ZIO.serviceWithZIO[MultiplexRepository](_.getMoviesByIds(ids))
 
   def getScreeningReservations(screeningId: UUID): ZIO[MultiplexRepository, Throwable, List[Reservation]] =
     ZIO.serviceWithZIO[MultiplexRepository](_.getScreeningReservations(screeningId))

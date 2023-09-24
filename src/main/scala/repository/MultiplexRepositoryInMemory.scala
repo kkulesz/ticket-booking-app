@@ -1,29 +1,52 @@
 package repository
 
-import domain._
 import java.time.LocalDateTime
 import zio.ZLayer
 import zio.ZIO
 import zio.Task
 import java.util.UUID
 
+import domain._
+import domain.viewModel._
+
 class MultiplexRepositoryInMemory extends MultiplexRepository {
   override def getScreeningsFromTime(
       timestamp: LocalDateTime
-  ): Task[List[Screening]] =
-    // get screenings that start in (t-30min, t+30min) range
-    ZIO.succeed(
-      screenings.filter(scr =>
-        scr.time.isAfter(timestamp.minusMinutes(30)) &&
-          scr.time.isBefore(timestamp.plusMinutes(30))
+  ): Task[List[ScreeningResponse]] = {
+    /*
+    SELECT 
+      s.id, m.title, s.time, m.length 
+    FROM screenings s 
+    LEFT JOIN movies m ON s.movieId = m.id 
+    ORDER BY m.title ASC, s.time ASC
+    */
+    val scrs = screenings.filter(scr =>
+      scr.time.isAfter(timestamp.minusMinutes(30)) &&
+        scr.time.isBefore(timestamp.plusMinutes(30))
+    )
+
+    val movieIds = scrs.map(_.movieId)
+    val screeningsWithMovies = scrs
+      .flatMap(s =>
+        movies
+          .filter(_.id == s.movieId)
+          .map(m => (s, m))
       )
-    )
+      // sorting in alphabetical order, then from earliest
+      .sortWith { case ((s1, m1), (s2, m2)) =>
+        if (m1.title == m2.title)
+          s1.time.isBefore(s2.time)
+        else
+          m1.title < m2.title
+      }
 
-  override def getMoviesByIds(ids: List[UUID]): Task[List[Movie]] =
-    ZIO.succeed(
-      movies.filter(m => ids.contains(m.id))
-    )
+    val viewModel = screeningsWithMovies.map { case (s, m) =>
+      ScreeningResponse.fromDomain(s, m)
+    }
 
+    ZIO.succeed(viewModel)
+  }
+  
   override def getScreeningById(id: UUID): Task[Option[Screening]] =
     ZIO.succeed(
       screenings.find(_.id == id)
