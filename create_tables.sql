@@ -1,3 +1,6 @@
+CREATE DATABASE ticket_booking;
+\c ticket_booking;
+
 CREATE TABLE movies(
     id      VARCHAR(255) NOT NULL,
     title   VARCHAR(255) NOT NULL,
