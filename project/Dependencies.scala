@@ -23,13 +23,13 @@ object Dependencies {
     private val zioVersion              = "1.0.1" // "1.0.1" // "2.0.17"
     private val zioHtppVersion          = "3.0.0-RC2"
     private val zioJsonVersion          = "0.6.2"
-    private val zioInteropCarsVersion   = "2.1.4.0" // "2.1.4.0" // "2.0.0.0-RC12"
+    private val zioInteropCaTsVersion   = "22.0.0.0" // "2.1.4.0" // "2.0.0.0-RC12"
     // private val zioNioVersion = "2.0.0"
 
     val zio             = "dev.zio" %% "zio"                % zioVersion
     val zioHttp         = "dev.zio" %% "zio-http"           % zioHtppVersion
     val zioJson         = "dev.zio" %% "zio-json"           % zioJsonVersion
-    val zioInteropCats  = "dev.zio" %% "zio-interop-cats"   % zioInteropCarsVersion
+    val zioInteropCats  = "dev.zio" %% "zio-interop-cats"   % zioInteropCaTsVersion
     // val zioNio = "dev.zio" %% "zio-nio" % zioNioVersion
 
     val all: Seq[ModuleID] = Seq(zio, zioHttp, zioJson, zioInteropCats)
