@@ -4,6 +4,7 @@ out
 .metals
 .bsp
 postgres-data
+project/.bloop
 
 *.class
 *.log

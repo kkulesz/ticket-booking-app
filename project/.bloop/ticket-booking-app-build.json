@@ -10,7 +10,8 @@
             "/workspaces/ticket-booking-app/project/src/main/scala-2",
             "/workspaces/ticket-booking-app/project/src/main/java",
             "/workspaces/ticket-booking-app/project/src/main/scala-sbt-1.0",
-            "/workspaces/ticket-booking-app/project/target/scala-2.12/sbt-1.0/src_managed/main"
+            "/workspaces/ticket-booking-app/project/target/scala-2.12/sbt-1.0/src_managed/main",
+            "/workspaces/ticket-booking-app/project/Dependencies.scala"
         ],
         "dependencies": [
             
