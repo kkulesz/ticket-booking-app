@@ -4,33 +4,32 @@ services:
     image: postgres:14.1-alpine
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: postgres
+      POSTGRES_DB: postgres
     ports:
-      - '5432:5432'
-    volumes: 
-      - ./postgres-data:/var/lib/postgresql/data
-      - ./create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
-    networks:
-      - ntw
+      - '5434:5432'
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
 
-  api:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - '8081:8081'
-    depends_on:
-      - postgres
-    networks:
-      - ntw
+# TODO: There is some kind of bug that images do not map prots between themselves (?).
+# Meaning: while connecting to postgres-container on localhost:5434, api-container throws 'connection-refused'. 
+# At the same time, when build app on local machine, everything works just fine.
+# To solve in the future, because now I lost enough time on that
+# https://medium.com/@TimvanBaarsen/how-to-connect-to-the-docker-host-from-inside-a-docker-container-112b4c71bc66
+
+  # api:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '8081:8081'
+  #   # extra_hosts:
+  #   #   - "host.docker.internal:host-gateway"
+  #   depends_on:
+  #     - db
 
 volumes:
   postgres-data:
 
-networks:
-  ntw:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.222.1.0/24
