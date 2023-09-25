@@ -21,7 +21,9 @@ object MultiplexRoutes {
         val response = for {
           time <- ZIO.fromOption(req.url.queryParams.get("time"))
           properTime = LocalDateTime.parse(time.asString)
-          screenings <- MultiplexHandler.getScreeningsFromTime(properTime)
+          screenings <- MultiplexHandler
+            .getScreeningsFromTime(properTime)
+            .mapError { case e => println(e.getMessage); e }
         } yield Response.json(screenings.toJson)
 
         catchErrorToProperResponse(response)
@@ -30,7 +32,10 @@ object MultiplexRoutes {
         val response = for {
           screeningId <- ZIO.fromOption(req.url.queryParams.get("id"))
           properId = UUID.fromString(screeningId.asString)
-          detailedScreening <- MultiplexHandler.getDetailedScreening(properId)
+          detailedScreening <- MultiplexHandler
+            .getDetailedScreening(properId)
+            .mapError { case e => println(e.getMessage); e }
+
         } yield Response.json(detailedScreening.toJson)
 
         catchErrorToProperResponse(response)

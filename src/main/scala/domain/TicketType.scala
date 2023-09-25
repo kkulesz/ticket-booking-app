@@ -1,6 +1,7 @@
 package domain
 
 import zio.json._
+import doobie.util.{Read, Write}
 
 sealed trait TicketType extends Product with Serializable {
   def asString: String
@@ -21,11 +22,19 @@ object TicketType {
   implicit val jsonEncoder: JsonEncoder[TicketType] =
     JsonEncoder.string.contramap(_.asString)
 
-  implicit val jsonDecoder: JsonDecoder[TicketType] = JsonDecoder[String].map {
+  implicit val jsonDecoder: JsonDecoder[TicketType] =
+    JsonDecoder[String].map(s => TicketType.fromString(s))
+
+  def fromString(str: String): TicketType = str match {
     case Adult.asString   => Adult
     case Student.asString => Student
     case Child.asString   => Child
-    case other =>
-      throw new IllegalArgumentException(s"Invalid TicketType value: $other")
+    case _: String        => Adult // default is adult
   }
+
+  implicit val ticketTypeRead: Read[TicketType] =
+    Read[String].map(s => TicketType.fromString(s))
+
+  implicit val ticketTypeWrite: Write[TicketType] = 
+    Write[String].contramap(_.asString)
 }

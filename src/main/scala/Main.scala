@@ -2,14 +2,11 @@ import zio.ZIOAppDefault
 import zio.http.Server
 
 import api.{MultiplexRoutes, MultiplexHandlerBasic}
-import repository.MultiplexRepositoryInMemory
-
-// object Main extends App {
-//   println("Hello, World!")
-// }
+import repository.{MultiplexRepositoryInMemory, MultiplexRepositoryPostgres}
 
 object ZioApp extends ZIOAppDefault {
-  val layers = MultiplexRepositoryInMemory.layer ++ MultiplexHandlerBasic.layer
+  // val layers = MultiplexRepositoryInMemory.layer ++ MultiplexHandlerBasic.layer
+  val layers = MultiplexRepositoryPostgres.layer ++ MultiplexHandlerBasic.layer
 
   override val run = {
     val routes = MultiplexRoutes()
