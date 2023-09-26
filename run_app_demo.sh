@@ -21,14 +21,14 @@ echo "Starting..."
 #################################################################################
 screening_time="2023-09-22T12:30:00"
 resp1=$(curl -s --request GET \
-  --url "http://localhost:8081/movies?time=${screening_time}")
+  --url "http://localhost:8081/screenings?time=${screening_time}")
 echo -e "\nPoint nr 2 response:"
 echo $(echo "$resp1" | jq --color-output )
 
 
 screening_id=$(echo "$resp1" | jq -r '.[0].id')
 resp2=$(curl -s --request GET \
-  --url "http://localhost:8081/screenings?id=${screening_id}")
+  --url "http://localhost:8081/screenings/${screening_id}")
 echo -e "\nPoint nr 4 response:"
 echo $(echo "$resp2" | jq --color-output )
 
@@ -55,5 +55,5 @@ resp3=$(curl -s --request POST \
 echo -e "\nPoint nr 6 response:"
 echo $(echo "$resp3" | jq --color-output )
 
-echo -e" \nDemo finished."
+echo -e "\nDemo finished."
 

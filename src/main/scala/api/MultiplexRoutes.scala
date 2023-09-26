@@ -17,7 +17,7 @@ object MultiplexRoutes {
     Response
   ] =
     Http.collectZIO[Request] {
-      case req @ Method.GET -> Root / "movies" =>
+      case req @ Method.GET -> Root / "screenings" =>
         val response = for {
           time <- ZIO.fromOption(req.url.queryParams.get("time"))
           properTime = LocalDateTime.parse(time.asString)
@@ -28,10 +28,9 @@ object MultiplexRoutes {
 
         catchErrorToProperResponse(response)
 
-      case req @ Method.GET -> Root / "screenings" =>
+      case req @ Method.GET -> Root / "screenings" / id =>
         val response = for {
-          screeningId <- ZIO.fromOption(req.url.queryParams.get("id"))
-          properId = UUID.fromString(screeningId.asString)
+          properId <- ZIO.attempt(UUID.fromString(id))
           detailedScreening <- MultiplexHandler
             .getDetailedScreening(properId)
             .mapError { case e => println(e.getMessage); e }
