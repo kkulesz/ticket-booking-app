@@ -24,7 +24,8 @@
 			"seat": [int, int],
 			"ticketType": "Adult"|"Child"|"Student"
 		}
-	]
+	],
+	"voucher": uuid // optional
 }
 ```
 

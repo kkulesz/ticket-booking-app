@@ -63,7 +63,20 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
       newReservations: List[Reservation]
   ): Task[Unit] =
     ZIO.succeed(
-      this.reservations = this.reservations ++ newReservations // TODO comment
+      this.reservations = this.reservations ++ newReservations
+    )
+
+  override def getVoucherById(id: UUID): Task[Option[Voucher]] =
+    ZIO.succeed(
+      vouchers.find(_.id == id)
+    )
+
+  override def updateVoucher(updated: Voucher): Task[Unit] =
+    ZIO.succeed(
+      vouchers.map(v =>
+        if (v.id == updated.id) updated
+        else v
+      )
     )
 
   private val movies: List[Movie] = List(
@@ -133,6 +146,11 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
   // I know we should never use 'var', because it's not functional and it's just not the way you write in Scala.
   // Normally this should be some kind of database, of course
   private var reservations: List[Reservation] = List()
+
+  private var vouchers: List[Voucher] = List(
+    Voucher(UUID.fromString("00000000-2451-422c-8366-ff5ca12ec72a"), false),
+    Voucher(UUID.fromString("00000000-2451-422c-8366-ff5ca12ec72b"), true)
+  )
 
 }
 

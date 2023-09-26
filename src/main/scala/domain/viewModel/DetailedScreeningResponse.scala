@@ -18,7 +18,7 @@ object DetailedScreeningResponse {
       room: Room,
       reservations: List[Reservation]
   ): DetailedScreeningResponse = {
-    val allSeats = for { // seats are indexed from 0 TODO
+    val allSeats = for {
       r <- 0 until room.rows
       c <- 0 until room.columns
     } yield (r, c)

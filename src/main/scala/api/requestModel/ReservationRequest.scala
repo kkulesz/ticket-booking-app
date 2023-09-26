@@ -3,11 +3,14 @@ package api.requestModel
 import zio.json._
 import java.util.UUID
 
+import domain.Voucher
+
 final case class ReservationRequest(
     name: String,
     surname: String,
     screeningId: UUID,
-    seats: List[SeatReservation]
+    seats: List[SeatReservation],
+    voucher: Option[Voucher]
 )
 
 object ReservationRequest {

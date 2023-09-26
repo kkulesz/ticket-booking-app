@@ -14,6 +14,8 @@ trait MultiplexRepository {
   def getScreeningReservations(screeningId: UUID): Task[List[Reservation]]
   def getRoomById(id: String): Task[Option[Room]]
   def insertReservations(newReservations: List[Reservation]): Task[Unit]
+  def getVoucherById(id: UUID): Task[Option[Voucher]]
+  def updateVoucher(voucher: Voucher): Task[Unit]
 }
 
 object MultiplexRepository {
@@ -31,4 +33,10 @@ object MultiplexRepository {
 
   def insertReservations(newReservations: List[Reservation]): ZIO[MultiplexRepository, Throwable, Unit] =
     ZIO.serviceWithZIO[MultiplexRepository](_.insertReservations(newReservations))
+  
+  def getVoucherById(id: UUID): ZIO[MultiplexRepository, Throwable, Option[Voucher]] =
+    ZIO.serviceWithZIO[MultiplexRepository](_.getVoucherById(id))
+
+  def updateVoucher(voucher: Voucher): ZIO[MultiplexRepository, Throwable, Unit] =
+    ZIO.serviceWithZIO[MultiplexRepository](_.updateVoucher(voucher))
 }

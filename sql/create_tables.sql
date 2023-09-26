@@ -26,3 +26,8 @@ CREATE TABLE reservations(
     ticket_type     VARCHAR(32) NOT NULL
 );
 
+CREATE TABLE vouchers(
+    id      VARCHAR(255) NOT NULL,
+    is_used BOOLEAN NOT NULL
+)
+

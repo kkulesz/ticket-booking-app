@@ -73,6 +73,19 @@ class MultiplexRepositoryPostgres extends MultiplexRepository {
       .updateMany(newReservations)
       .transact(xa)
       .map(_ => ())
+
+  override def getVoucherById(id: UUID): Task[Option[Voucher]] =
+    Queries
+      .getVoucherById(id)
+      .option
+      .transact(xa)
+
+  override def updateVoucher(voucher: Voucher): Task[Unit] =
+    Queries
+      .updateVoucher(voucher)
+      .run
+      .transact(xa)
+      .map(_ => ())
 }
 
 object MultiplexRepositoryPostgres {
@@ -86,7 +99,10 @@ object MultiplexRepositoryPostgres {
             FROM screenings s
             JOIN movies m 
               ON s.movie_id = m.id
-            WHERE s.time >= ${timestamp.minusMinutes(margin)} AND s.time <=${timestamp.plusMinutes(margin)} 
+            WHERE 
+              s.time >= ${timestamp.minusMinutes(
+          margin
+        )} AND s.time <=${timestamp.plusMinutes(margin)} 
             ORDER BY 
               m.title ASC, s.time ASC;"""
         .query[(String, String, LocalDateTime, Int)]
@@ -152,6 +168,24 @@ object MultiplexRepositoryPostgres {
 
       Update[Reservation](stmt)
     }
+
+    def getVoucherById(id: UUID)(implicit
+        read: Read[Voucher]
+    ): Query0[Voucher] =
+      sql"""SELECT 
+              v.id, v.is_used
+            FROM vouchers v
+            WHERE v.id = ${id.toString};"""
+        .query[(String, Boolean)]
+        .map { case (id, isUsed) =>
+          Voucher(UUID.fromString(id), isUsed)
+        }
+
+    def updateVoucher(voucher: Voucher): Update0 =
+      sql"""UPDATE vouchers
+            SET is_used = ${voucher.isUsed}
+            WHERE id = ${voucher.id.toString}
+      """.update
   }
   def layer: ZLayer[Any, Nothing, MultiplexRepositoryPostgres] =
     ZLayer.fromZIO(ZIO.succeed(new MultiplexRepositoryPostgres()))

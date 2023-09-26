@@ -1,6 +1,7 @@
 package api
 
 import java.time.LocalDateTime
+import java.time.DayOfWeek
 import java.time.temporal.ChronoUnit;
 import zio.ZIO
 import zio.Task
@@ -87,6 +88,23 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       .mapError(_ => new RuntimeException("No such screening!"))
     // _ <- validateReservationHour(screening) TODO: commenting out for demo reasons
 
+    eitherFailOrVoucherOpt <- request.voucher match { 
+      case None => ZIO.succeed(Right(None))
+      case Some(v) => MultiplexRepository
+          .getVoucherById(v.id)
+          .map{ case vDbOpt =>
+            vDbOpt match{
+              case None => Left(new RuntimeException("Invalid voucher!"))
+              case Some(vDb) => 
+                if (vDb.isUsed) 
+                  Left(new RuntimeException("Voucher is already used!"))
+                else 
+                  Right(Some(vDb))
+            }
+          }
+    }
+    voucherOpt <- ZIO.fromEither(eitherFailOrVoucherOpt)
+
     reservationsSoFar <- MultiplexRepository
       .getScreeningReservations(screening.id)
 
@@ -107,9 +125,13 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       )
     )
     _ <- MultiplexRepository.insertReservations(newReservations)
+    _ <- voucherOpt match {
+      case None     => ZIO.unit
+      case Some(v)  => MultiplexRepository.updateVoucher(Voucher(v.id, true))
+    }
     expirationDate = screening.time
       .minusMinutes(Config.ReservationPeriodBeforeScreeningInMinutes)
-    amountToPay = request.seats.map(_.ticketType.price).sum
+    amountToPay = calculateAmountToPay(request, screening, voucherOpt)
 
   } yield ReservationSummaryResponse(amountToPay, expirationDate)
 
@@ -142,7 +164,6 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       ZIO.fail(new RuntimeException("It's too late to book seats!"))
     else
       ZIO.unit
-
 
   private def validateReservations(
       request: ReservationRequest,
@@ -194,6 +215,34 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       }
 
     stringRepresentations.find(_.contains("101")).isDefined
+  }
+
+  private def calculateAmountToPay(
+    request: ReservationRequest,
+    screening: Screening,
+    voucherOpt: Option[Voucher]
+  ): BigDecimal = {
+    val basicPrice = request.seats.map(_.ticketType.price).sum
+    val weekendBonus = 
+      if (isWeekend(screening.time))
+        BigDecimal(Config.AmountHigherDuringWeekend * request.seats.length)
+      else BigDecimal(0)
+    val price = basicPrice + weekendBonus
+
+    voucherOpt match {
+      case None         => price
+      case Some(value)  => price * Config.FractionAfterVoucherApplication
+    }
+  }
+
+  private def isWeekend(dateTime: LocalDateTime): Boolean = {
+    import DayOfWeek._
+    dateTime.getDayOfWeek match{
+      case FRIDAY   => dateTime.getHour >= 17
+      case SATURDAY => true
+      case SUNDAY   => dateTime.getHour <= 23
+      case _        => false
+    }
   }
 
 }

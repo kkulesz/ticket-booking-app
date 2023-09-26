@@ -21,3 +21,10 @@ VALUES
     ('99f4b3d9-2451-422c-8366-ff5ca12ec72d', '67f4b3d9-2451-422c-8366-ff5ca12ec72b', 'pokój nr 2', '2023-09-22T12:35:00'), -- room1 movie1
     ('99f4b3d9-2451-422c-8366-ff5ca12ec72e', '67f4b3d9-2451-422c-8366-ff5ca12ec72b', 'pokój nr 3', '2023-09-22T12:30:00'), -- room2 movie1
     ('99f4b3d9-2451-422c-8366-ff5ca12ec72f', '67f4b3d9-2451-422c-8366-ff5ca12ec72c', 'pokój nr 3', '2023-09-22T12:35:00'); -- room2 movie2
+
+
+INSERT INTO vouchers
+    (id, is_used)
+VALUES
+    ('00000000-2451-422c-8366-ff5ca12ec72a', FALSE),
+    ('00000000-2451-422c-8366-ff5ca12ec72b', TRUE);
