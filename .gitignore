@@ -5,6 +5,9 @@ out
 .bsp
 postgres-data
 project/.bloop
+.vscode
+project/project
+project/metals.sbt
 
 *.class
 *.log
