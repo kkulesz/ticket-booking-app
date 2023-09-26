@@ -1,6 +1,7 @@
 package api
 
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit;
 import zio.ZIO
 import zio.Task
 import zio.ZLayer
@@ -10,6 +11,7 @@ import repository.MultiplexRepository
 import api.requestModel.ReservationRequest
 import domain._
 import domain.viewModel._
+import utils.Config
 
 trait MultiplexHandler {
   def getScreeningsFromTime(
@@ -70,7 +72,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
       roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
       room <- ZIO
         .fromOption(roomOpt)
-        .mapError(_ => new RuntimeException("Internal server error: No such room")) // TODO: comment
+        .mapError(_ => new RuntimeException("Internal server error: No such room"))
 
     } yield DetailedScreeningResponse.fromDomain(room, reservations)
 
@@ -83,13 +85,15 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     screening <- ZIO
       .fromOption(screeningOpt)
       .mapError(_ => new RuntimeException("No such screening!"))
+    _ <- validateReservationHour(screening)
+
     reservationsSoFar <- MultiplexRepository
       .getScreeningReservations(screening.id)
 
     roomOpt <- MultiplexRepository.getRoomById(screening.roomId)
     room <- ZIO
       .fromOption(roomOpt)
-      .mapError(_ =>new RuntimeException("Internal server error: No such room")) // TODO: comment
+      .mapError(_ => new RuntimeException("Internal server error: No such room"))
 
     _ <- validateReservations(request, reservationsSoFar, room)
     newReservations = request.seats.map(sr =>
@@ -104,7 +108,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     )
     _ <- MultiplexRepository.insertReservations(newReservations)
     expirationDate = screening.time
-      .minusMinutes(15) // reservation until 15 minutes before screening, TODO
+      .minusMinutes(Config.ReservationPeriodBeforeScreeningInMinutes)
     amountToPay = request.seats.map(_.ticketType.price).sum
 
   } yield ReservationSummaryResponse(amountToPay, expirationDate)
@@ -116,7 +120,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     val sn = request.surname
 
     // only business ruquirements met, nothing more
-    if (fn.length < 3 || sn.length < 3)
+    if (fn.length < Config.NameMinLength || sn.length < Config.NameMinLength)
       ZIO.fail(new RuntimeException("Name and surname must have at least 3 characters!"))
     else if (!fn(0).isUpper || !sn(0).isUpper)
       ZIO.fail(new RuntimeException("Name and surname must start with capital letter!"))
@@ -127,6 +131,18 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     else
       ZIO.unit
   }
+
+  private def validateReservationHour(
+    screening: Screening
+  ): ZIO[MultiplexRepository, Throwable, Unit] = 
+    if (
+      LocalDateTime.now.until(screening.time, ChronoUnit.MINUTES ) < 
+        Config.MinimumPeriodBeforeBookingInMinutes
+    )
+      ZIO.fail(new RuntimeException("It's too late to book seats!"))
+    else
+      ZIO.unit
+
 
   private def validateReservations(
       request: ReservationRequest,

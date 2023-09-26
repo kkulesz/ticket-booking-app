@@ -118,7 +118,7 @@ object MultiplexRepositoryPostgres {
             WHERE r.screening_id = ${screeningId.toString};"""
         .query[(String, Int, Int, String, String, String)]
         .map { case (id, row, col, name, surname, ticketType) =>
-          val r = Reservation(
+          Reservation(
             UUID.fromString(id),
             row,
             col,
