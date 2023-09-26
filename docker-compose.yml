@@ -13,8 +13,8 @@ services:
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
 
-# TODO: There is some kind of bug that images do not map prots between themselves (?).
-# Meaning: while connecting to postgres-container on localhost:5434, api-container throws 'connection-refused'. 
+# TODO: There is some kind of bug that containers do not map ports between themselves in devcontainer.
+# Meaning: while trying to connect to postgres-container on localhost:5434, api-container throws 'connection-refused'. 
 # At the same time, when build app on local machine, everything works just fine.
 # To solve in the future, because now I lost enough time on that
 # https://medium.com/@TimvanBaarsen/how-to-connect-to-the-docker-host-from-inside-a-docker-container-112b4c71bc66
@@ -25,8 +25,6 @@ services:
   #     dockerfile: Dockerfile
   #   ports:
   #     - '8081:8081'
-  #   # extra_hosts:
-  #   #   - "host.docker.internal:host-gateway"
   #   depends_on:
   #     - db
 
