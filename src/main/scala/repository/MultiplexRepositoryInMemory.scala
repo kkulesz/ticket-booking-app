@@ -8,21 +8,16 @@ import java.util.UUID
 
 import domain._
 import domain.viewModel._
+import utils.Config
 
 class MultiplexRepositoryInMemory extends MultiplexRepository {
   override def getScreeningsFromTime(
       timestamp: LocalDateTime
   ): Task[List[ScreeningResponse]] = {
-    /*
-    SELECT 
-      s.id, m.title, s.time, m.length 
-    FROM screenings s 
-    LEFT JOIN movies m ON s.movieId = m.id 
-    ORDER BY m.title ASC, s.time ASC
-    */
+    val margin = Config.MinimumPeriodBeforeBookingInMinutes
     val scrs = screenings.filter(scr =>
-      scr.time.isAfter(timestamp.minusMinutes(30)) &&
-        scr.time.isBefore(timestamp.plusMinutes(30))
+      scr.time.isAfter(timestamp.minusMinutes(margin)) &&
+        scr.time.isBefore(timestamp.plusMinutes(margin))
     )
 
     val movieIds = scrs.map(_.movieId)
@@ -46,7 +41,7 @@ class MultiplexRepositoryInMemory extends MultiplexRepository {
 
     ZIO.succeed(viewModel)
   }
-  
+
   override def getScreeningById(id: UUID): Task[Option[Screening]] =
     ZIO.succeed(
       screenings.find(_.id == id)

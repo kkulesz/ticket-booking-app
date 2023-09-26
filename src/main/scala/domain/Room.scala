@@ -2,9 +2,6 @@ package domain
 
 import zio.json._
 
-// For simplicity: TODO
-// - each room is rectangle
-// - each room is supposed to have different name, no validation there
 final case class Room(id: String, rows: Int, columns: Int)
 
 object Room {

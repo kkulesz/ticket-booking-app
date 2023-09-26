@@ -85,7 +85,7 @@ class MultiplexHandlerBasic extends MultiplexHandler {
     screening <- ZIO
       .fromOption(screeningOpt)
       .mapError(_ => new RuntimeException("No such screening!"))
-    _ <- validateReservationHour(screening)
+    // _ <- validateReservationHour(screening) TODO: commenting out for demo reasons
 
     reservationsSoFar <- MultiplexRepository
       .getScreeningReservations(screening.id)

@@ -23,6 +23,7 @@ import doobie._
 
 import domain._
 import domain.viewModel._
+import utils.Config
 
 import repository.MultiplexRepositoryPostgres.Queries
 
@@ -78,19 +79,21 @@ object MultiplexRepositoryPostgres {
   object Queries {
     def getScreeningsFromTime(
         timestamp: LocalDateTime
-    )(implicit read: Read[ScreeningResponse]): Query0[ScreeningResponse] =
+    )(implicit read: Read[ScreeningResponse]): Query0[ScreeningResponse] = {
+      val margin = Config.ScreeningTimeMarginInMinutes
       sql"""SELECT 
                 s.id, m.title, s.time, m.length 
             FROM screenings s
             JOIN movies m 
               ON s.movie_id = m.id
-            WHERE s.time = ${timestamp} 
+            WHERE s.time >= ${timestamp.minusMinutes(margin)} AND s.time <=${timestamp.plusMinutes(margin)} 
             ORDER BY 
               m.title ASC, s.time ASC;"""
         .query[(String, String, LocalDateTime, Int)]
         .map { case (id, title, time, length) =>
           ScreeningResponse.fromDbValues(id, title, time, length)
         }
+    }
 
     def getScreeningById(
         id: UUID
