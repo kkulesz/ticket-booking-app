@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - '5434:5432'
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+
+# TODO: There is some kind of bug that containers do not map ports between themselves in devcontainer.
+# Meaning: while trying to connect to postgres-container on localhost:5434, api-container throws 'connection-refused'. 
+# At the same time, when build app on local machine, everything works just fine.
+# To solve in the future, because now I lost enough time on that
+# https://medium.com/@TimvanBaarsen/how-to-connect-to-the-docker-host-from-inside-a-docker-container-112b4c71bc66
+
+  # api:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '8081:8081'
+  #   depends_on:
+  #     - db
+
+volumes:
+  postgres-data:
+
